@@ -17,4 +17,5 @@ include ':common',
         ':jvm:workbookapp', 
         ':jvm:recorderapp', 
         ':jvm',
-        ':assets'
+        ':assets',
+        ':kotlin-resource-container'
