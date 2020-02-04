@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 import jooq.Tables.RESOURCE_LINK
 import org.jooq.DSLContext
 import org.jooq.Record3
+import org.jooq.Record4
 import org.jooq.Select
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
@@ -104,6 +105,21 @@ class ResourceLinkDao(
             .insertInto(
                 RESOURCE_LINK,
                 RESOURCE_LINK.COLLECTION_FK,
+                RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                RESOURCE_LINK.DUBLIN_CORE_FK
+            )
+            .select(select)
+            .execute()
+    }
+
+    /** @param select a record of values for collection ID, main content ID, resource content ID, dublinCore ID */
+    @Synchronized
+    fun insertNoReturn(select: Select<Record4<Int, Int, Int, Int>>, dsl: DSLContext = instanceDsl) {
+        dsl
+            .insertInto(
+                RESOURCE_LINK,
+                RESOURCE_LINK.COLLECTION_FK,
+                RESOURCE_LINK.CONTENT_FK,
                 RESOURCE_LINK.RESOURCE_CONTENT_FK,
                 RESOURCE_LINK.DUBLIN_CORE_FK
             )

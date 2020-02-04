@@ -1,10 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
-import org.jooq.DSLContext
-import org.jooq.Record
-import org.jooq.Select
-import org.jooq.SelectFieldOrAsterisk
+import org.jooq.*
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
@@ -74,15 +71,13 @@ class ContentDao(
     /**
      *  Build a JOOQ select statement that locates linkable resource/verse pairs within the given collection.
      *  Resources that are already linked are skipped.
-     *  For convenience, [extraFields] will be appended in columns to the right of each row.
      */
     fun selectLinkableVerses(
         mainTypes: Collection<ContentType>,
         helpTypes: Collection<ContentType>,
         parentCollectionId: Int,
-        vararg extraFields: SelectFieldOrAsterisk,
         dsl: DSLContext = instanceDsl
-    ): Select<Record> {
+    ): Select<Record2<Int, Int>> {
         val mainTypeIds = mainTypes.map(contentTypeDao::fetchId)
         val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
 
@@ -92,7 +87,7 @@ class ContentDao(
         val existingLinkSubquery = dsl.select(existingLink.RESOURCE_CONTENT_FK).from(existingLink)
 
         return dsl
-            .select(main.ID, help.ID, *extraFields)
+            .select(main.ID, help.ID)
             .from(main)
             .join(help)
             .using(CONTENT_ENTITY.COLLECTION_FK, CONTENT_ENTITY.START)
@@ -106,14 +101,12 @@ class ContentDao(
     /**
      *  Build a JOOQ select statement that locates linkable chapter/verse pairs within the given collection.
      *  Resources that are already linked are skipped.
-     *  For convenience, [extraFields] will be appended in columns to the right of each row.
      */
     fun selectLinkableChapters(
         helpTypes: Collection<ContentType>,
         collectionId: Int,
-        vararg extraFields: SelectFieldOrAsterisk,
         dsl: DSLContext = instanceDsl
-    ): Select<Record> {
+    ): Select<Record2<Int, Int>> {
         val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
 
         val main = COLLECTION_ENTITY.`as`("main")
@@ -122,7 +115,7 @@ class ContentDao(
         val existingLinkSubquery = dsl.select(existingLink.RESOURCE_CONTENT_FK).from(existingLink)
 
         return dsl
-            .select(main.ID, help.ID, *extraFields)
+            .select(main.ID, help.ID)
             .from(main)
             .join(help)
             .onKey()

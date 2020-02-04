@@ -3,9 +3,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import jooq.Tables
 import org.jooq.DSLContext
-import org.jooq.Record3
+import org.jooq.Record4
 import org.jooq.Select
+import org.jooq.Table
 import org.jooq.impl.DSL
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
@@ -185,8 +187,7 @@ class ResourceContainerRepository(
                         importCollection(collection, it)
                     }
                 if (collection != null) {
-                    linkChapterResources(collection)
-                    linkVerseResources(collection)
+                    linkResources(collection)
                 }
             }
 
@@ -200,27 +201,50 @@ class ResourceContainerRepository(
             if (entities.isNotEmpty()) contentDao.insertNoReturn(*entities.toTypedArray())
         }
 
-        private fun linkVerseResources(parentCollection: Collection) {
-            @Suppress("UNCHECKED_CAST")
-            val matchingVerses = contentDao.selectLinkableVerses(
-                primaryContentTypes,
-                helpContentTypes,
-                parentCollection.id,
-                dublinCoreIdDslVal
-            ) as Select<Record3<Int, Int, Int>>
+        private fun linkResources(parentCollection: Collection) {
+            database.transaction { dsl ->
 
-            resourceLinkDao.insertContentResourceNoReturn(matchingVerses)
-        }
+                val matchingVerses = contentDao.selectLinkableVerses(
+                    mainTypes = primaryContentTypes,
+                    helpTypes = helpContentTypes,
+                    parentCollectionId = parentCollection.id,
+                    dsl = dsl
+                )
 
-        private fun linkChapterResources(parentCollection: Collection) {
-            @Suppress("UNCHECKED_CAST")
-            val matchingVerses = contentDao.selectLinkableChapters(
-                helpContentTypes,
-                parentCollection.id,
-                dublinCoreIdDslVal
-            ) as Select<Record3<Int, Int, Int>>
+                val matchingChapters = contentDao.selectLinkableChapters(
+                    helpTypes = helpContentTypes,
+                    collectionId = parentCollection.id,
+                    dsl = dsl
+                )
 
-            resourceLinkDao.insertCollectionResourceNoReturn(matchingVerses)
+                val nullContentValue = DSL.`val`(null, Tables.RESOURCE_LINK.CONTENT_FK)
+                val nullCollectionValue = DSL.`val`(null, Tables.RESOURCE_LINK.COLLECTION_FK)
+
+                val shapedChapterQuery: Table<Record4<Int, Int, Int, Int>> = dsl
+                    .select(
+                        matchingChapters.field(0), // COLLECTION_FK
+                        nullContentValue, // CONTENT_FK 
+                        matchingChapters.field(1), // RESOURCE_FK
+                        dublinCoreIdDslVal // RC_FK
+                    )
+                    .from(matchingChapters)
+                    .where(DSL.trueCondition()).asTable()
+
+                val shapedVerseQuery = dsl
+                    .select(
+                        nullCollectionValue,  // COLLECTION_FK
+                        matchingVerses.field(0), // CONTENT_FK 
+                        matchingVerses.field(1), // RESOURCE_FK
+                        dublinCoreIdDslVal // RC_FK
+                    )
+                    .from(matchingVerses)
+                    .where(DSL.trueCondition())
+
+                resourceLinkDao.insertNoReturn(shapedChapterQuery, dsl)
+                resourceLinkDao.insertNoReturn(shapedVerseQuery, dsl)
+//                val subqueryToInsert = shapedChapterQuery.unionAll(shapedVerseQuery)
+//                resourceLinkDao.insertNoReturn(subqueryToInsert, dsl)
+            }
         }
     }
 }
