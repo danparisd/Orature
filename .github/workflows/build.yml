@@ -24,7 +24,7 @@ jobs:
              wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz" && \
              wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz" && \
              wget --no-verbose -P $HOME/.install4j8/jres "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz" && \
-             if [ -f VERSION ]; then export VERSIONVAR="$(cat VERSION).$TRAVIS_BUILD_NUMBER"; fi
+             export VERSIONVAR="$(cat VERSION).$TRAVIS_BUILD_NUMBER"
       - name: install4j build
         run: "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN -PsentryDsn=$SENTRY_DSN :jvm:workbookapp:install4jdeploy"
 
