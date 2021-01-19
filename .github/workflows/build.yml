@@ -18,7 +18,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: install4j setup
         run: wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_8_0_4.tar.gz && tar -zxf install4j_unix_8_0_4.tar.gz && \
-             tar -zxf install4j_unix_8_0_4.tar.gz && \
+             7z x install4j_unix_8_0_4.tar.gz && \
              export INSTALL4JDIR="$(pwd)/install4j8.0.4" && \
              export APIURL="https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues" && \
              wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz" && \
