@@ -106,10 +106,7 @@ class WorkbookPageViewModel : ViewModel() {
                         FX.messages["chapter"], chapter.sort
                     ),
                     chapter = chapter,
-                    onClick = { chapter ->
-                        val chunked = chapter.chunked?.let { it } ?: false
-                        navigate(chapter, chunked)
-                    }
+                    onClick = { navigate(chapter) }
                 )
             }
             .doOnComplete {
@@ -154,7 +151,7 @@ class WorkbookPageViewModel : ViewModel() {
         selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
-        if (!chunked) {
+        if(!chunked) {
             workspace.dock<NotChunkedPage>()
             return
         }
