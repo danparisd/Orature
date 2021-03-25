@@ -88,7 +88,9 @@ open class RecordableViewModel(
                 }
                 .flatMapSingle { plugin ->
                     showPluginActive = !plugin.isNativePlugin()
-                    fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
+                    if (!plugin.isNativePlugin()) {
+                        fire(PluginOpenedEvent(PluginType.RECORDER))
+                    }
                     audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
@@ -115,7 +117,9 @@ open class RecordableViewModel(
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
                 showPluginActive = !plugin.isNativePlugin()
-                fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                if (!plugin.isNativePlugin()) {
+                    fire(PluginOpenedEvent(pluginType))
+                }
                 when (pluginType) {
                     PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
                     PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)

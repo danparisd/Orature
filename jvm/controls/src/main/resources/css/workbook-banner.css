@@ -1,20 +1,16 @@
-.workbook-banner {
-    -fx-max-width: 800px;
-}
-
 .workbook-banner__overlay {
     -fx-background-color: linear-gradient(to right, #094687f8, #09468733);
     -fx-background-radius: 10px;
 }
 
 .workbook-banner__book-title {
-    -fx-text-fill: -wa-white !important;
+    -fx-text-fill: -wa-white;
     -fx-font-weight: bold;
     -fx-font-size: 20px;
 }
 
 .workbook-banner__resource-title {
-    -fx-text-fill: -wa-white !important;
+    -fx-text-fill: -wa-white;
     -fx-font-size: 16px;
 }
 
