@@ -7,10 +7,6 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
-repositories {
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
-}
-
 dependencies {
     testImplementation "junit:junit:$junitVer"
 
@@ -22,7 +18,7 @@ dependencies {
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornadofxVer"
+    implementation "no.tornado:tornadofx2:$tornadofxVer"
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
