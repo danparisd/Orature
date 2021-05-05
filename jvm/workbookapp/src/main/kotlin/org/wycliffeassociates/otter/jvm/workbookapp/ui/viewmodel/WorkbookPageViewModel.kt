@@ -158,7 +158,7 @@ class WorkbookPageViewModel : ViewModel() {
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         if (!chunked) {
-            workspace.dock<NotChunkedPage>()
+            workspace.dockInNewScope<NotChunkedPage>(workbookDataStore)
             return
         }
         when (resourceMetadata.type) {
