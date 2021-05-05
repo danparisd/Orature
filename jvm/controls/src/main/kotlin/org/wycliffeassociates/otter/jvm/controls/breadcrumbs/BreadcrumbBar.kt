@@ -35,6 +35,10 @@ class BreadcrumbBar : HBox() {
         items.remove(item)
     }
 
+    fun popItem() {
+        items.remove(items.size -1, items.size)
+    }
+
     private fun removeItemAfter(item: BreadCrumb) {
         val fromIndex = items.indexOf(item) + 1
         items.remove(fromIndex, items.size)

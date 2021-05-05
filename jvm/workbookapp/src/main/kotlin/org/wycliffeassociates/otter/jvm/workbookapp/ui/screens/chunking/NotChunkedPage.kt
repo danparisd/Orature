@@ -12,13 +12,16 @@ import javafx.scene.paint.Paint
 import javax.inject.Inject
 import javax.inject.Provider
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.ScopeVM
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -30,6 +33,17 @@ class NotChunkedPage : Fragment() {
     val scopeVM: ScopeVM by inject()
     val vm: ChunkingViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.set("Chunking")
+        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
+    }
+
+    override fun onDock() {
+        super.onDock()
+        navigator.dock(this, breadCrumb)
+    }
 
     @Inject
     lateinit var launchPluginProvider: Provider<LaunchPlugin>
@@ -198,6 +212,7 @@ class NotChunkedPage : Fragment() {
                 {
                     fire(PluginClosedEvent(PluginType.MARKER))
                     workbookDataStore.activeChapterProperty.value.chunked = true
+                    navigator.popBreadcrumb()
                     workspace.dockedComponent!!.replaceWith<ChapterPage>()
                 }
             )

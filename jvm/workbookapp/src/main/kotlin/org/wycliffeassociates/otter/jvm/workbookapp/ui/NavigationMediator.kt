@@ -59,6 +59,10 @@ class NavigationMediator : Component(), ScopedInstance {
         }
     }
 
+    fun popBreadcrumb() {
+        breadCrumbsBar.popItem()
+    }
+
     fun back() {
         workspace.navigateBack()
     }
