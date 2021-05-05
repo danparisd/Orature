@@ -53,9 +53,11 @@ class ChapterPageViewModel : ViewModel() {
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNow { _chapter ->
             _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCard.set(chap)
+                if (chapter.chunked ?: false) {
+                    loadChapterContents(chapter).subscribe()
+                    val chap = CardData(chapter)
+                    chapterCard.set(chap)
+                }
             }
         }
     }
