@@ -12,7 +12,7 @@ repositories {
         }
     }
     ivy {
-        url 'https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec'
+        url 'https://audio-content.bibleineverylanguage.org/rc/b1d3890e-ec07-4ee3-89fe-174ffa750af5'
         patternLayout {
             // https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec/en_ulb_2pe.zip
             artifact '[artifact].[ext]'
@@ -50,7 +50,7 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('en_ulb_2pe-.zip$', 'en_ulb.zip')
+                filename.replaceAll('en_ulb_jas-.zip$', 'en_ulb.zip')
             }
     }
 }
