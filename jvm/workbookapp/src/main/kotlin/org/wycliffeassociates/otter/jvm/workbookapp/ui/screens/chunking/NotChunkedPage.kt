@@ -104,6 +104,7 @@ class NotChunkedPage : Fragment() {
                     .subscribe({}, {},
                         {
                             chapter.chunked = true
+                            navigator.popBreadcrumb()
                             workspace.dockedComponent!!.replaceWith<ChapterPage>()
                         }
                     )
