@@ -4,15 +4,16 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+
 
 const val SIGNED_SHORT_MAX = 32767
 
@@ -64,16 +65,23 @@ class WaveformImageBuilder(
         padding: Int
     ): Pair<Int, Int> {
         val framesPerPixel = reader.totalFrames / width
-
+        val first =  1.0 - (Math.ceil(reader.totalFrames / width.toDouble()) - (reader.totalFrames / width.toDouble()))
+        val error = (100 / Math.floor(first * 100.0)).toInt()
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
+        val errorBytes = ByteArray(bytes.size + 2)
         var globalMax = 1
         var globalMin = 0
         addPadding(img, 0, padding, height)
         reader.open()
         for (i in padding until width) {
-            reader.getPcmBuffer(bytes)
-            val bb = ByteBuffer.wrap(bytes)
+            val bb = if (error > 0 && i % error == 0) {
+                reader.getPcmBuffer(errorBytes)
+                ByteBuffer.wrap(errorBytes)
+            } else {
+                reader.getPcmBuffer(bytes)
+                ByteBuffer.wrap(bytes)
+            }
             bb.rewind()
             bb.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortsArray)
 
