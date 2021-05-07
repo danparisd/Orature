@@ -11,6 +11,7 @@ import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.roundToInt
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 
@@ -65,8 +66,8 @@ class WaveformImageBuilder(
         padding: Int
     ): Pair<Int, Int> {
         val framesPerPixel = reader.totalFrames / width
-        val first =  1.0 - (Math.ceil(reader.totalFrames / width.toDouble()) - (reader.totalFrames / width.toDouble()))
-        val error = (100 / Math.floor(first * 100.0)).toInt()
+        val remainingFrames = reader.totalFrames - (framesPerPixel * width)
+        val error = (width / remainingFrames.toDouble()).roundToInt()
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
         val errorBytes = ByteArray(bytes.size + 2)
