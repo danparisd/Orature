@@ -28,10 +28,15 @@ class WaveformContainer : Fragment() {
         mainWaveform = MainWaveform(viewModel)
 
         object : AnimationTimer() {
+            var frameSkip = 0
             override fun handle(currentNanoTime: Long) {
-                if (mainWaveform.image != null) {
-                    viewModel.calculatePosition()
+                if (frameSkip > 1) {
+                    if (mainWaveform.image != null) {
+                        viewModel.calculatePosition()
+                    }
+                    frameSkip = 0
                 }
+                frameSkip++
             }
         }.start()
     }
