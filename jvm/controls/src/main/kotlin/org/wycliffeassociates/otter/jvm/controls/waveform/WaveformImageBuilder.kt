@@ -65,9 +65,9 @@ class WaveformImageBuilder(
         height: Int,
         padding: Int
     ): Pair<Int, Int> {
-        val framesPerPixel = reader.totalFrames / width
-        val remainingFrames = reader.totalFrames - (framesPerPixel * width)
-        val error = (width / remainingFrames.toDouble()).roundToInt()
+        val framesPerPixel = Math.floor(reader.totalFrames / width.toDouble()).toInt()
+        val error = Math.abs((reader.totalFrames / width.toDouble()) - framesPerPixel.toDouble())
+        var accumulatedError = 0.0
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
         val errorBytes = ByteArray(bytes.size + 2)
@@ -76,10 +76,12 @@ class WaveformImageBuilder(
         addPadding(img, 0, padding, height)
         reader.open()
         for (i in padding until width) {
-            val bb = if (error > 0 && i % error == 0) {
+            val bb = if (accumulatedError > 1.0) {
+                accumulatedError -= 1.0
                 reader.getPcmBuffer(errorBytes)
                 ByteBuffer.wrap(errorBytes)
             } else {
+                accumulatedError += error
                 reader.getPcmBuffer(bytes)
                 ByteBuffer.wrap(bytes)
             }
