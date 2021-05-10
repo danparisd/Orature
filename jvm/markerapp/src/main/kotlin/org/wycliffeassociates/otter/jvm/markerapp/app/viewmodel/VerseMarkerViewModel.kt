@@ -137,9 +137,9 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun calculatePosition() {
         val current = audioPlayer.getAbsoluteLocationInFrames()
-        val duration = audioPlayer.getAbsoluteDurationInFrames().toDouble()
-        val percentPlayed = current / duration
-        val pos = percentPlayed * imageWidth
+        val duration = audioPlayer.getAbsoluteDurationInFrames()
+        val framesPerPixel = duration / imageWidth
+        var pos = current / framesPerPixel
         positionProperty.set(pos)
     }
 
