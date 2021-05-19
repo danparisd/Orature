@@ -11,6 +11,7 @@ rootProject.name = 'otter'
 
 include ':common',
         ':common:audio',
+        ':common:SeekableJlayer',
         ':jvm:utils', 
         ':jvm:device', 
         ':jvm:controls',

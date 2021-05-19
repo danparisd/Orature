@@ -7,4 +7,5 @@ dependencies {
 
     implementation project(':common')
     implementation project(':common:audio')
+    implementation project(":common:SeekableJlayer")
 }

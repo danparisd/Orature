@@ -11,8 +11,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 
 class AudioBufferPlayer : IAudioPlayer {
+
+    val logger = LoggerFactory.getLogger(AudioBufferPlayer::class.java)
 
     private var pause = AtomicBoolean(false)
     private var startPosition: Int = 0
@@ -42,10 +46,12 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = WavFileReader(WavFile(file)).let { _reader ->
+        logger.error("here: ${File("jas.mp3").absolutePath}")
+        //reader = WavFileReader(WavFile(file)).let { _reader ->
+        reader = MP3FileReader(File("jas.mp3")).let { _reader ->
             begin = 0
             end = _reader.totalFrames
-            bytes = ByteArray(_reader.sampleRate * _reader.channels)
+            bytes = ByteArray(12288)
             player = AudioSystem.getSourceDataLine(
                 AudioFormat(
                     _reader.sampleRate.toFloat(),
