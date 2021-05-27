@@ -1,10 +1,11 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import com.jfoenix.controls.JFXButton
+import com.jfoenix.controls.JFXProgressBar
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -22,30 +23,26 @@ import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.stage.Modality
-import javafx.stage.StageStyle
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 
-class ConfirmDialog : Fragment() {
+class ConfirmDialog : OtterDialog() {
 
     val titleTextProperty = SimpleStringProperty()
     val messageTextProperty = SimpleStringProperty()
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
     val confirmButtonTextProperty = SimpleStringProperty()
     val cancelButtonTextProperty = SimpleStringProperty()
+    val progressTitleProperty = SimpleStringProperty()
+    val showProgressBarProperty = SimpleBooleanProperty()
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    init {
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
-    }
-
-    override val root = vbox {
+    private val content = vbox {
         addClass("confirm-dialog")
 
         stackpane {
@@ -71,13 +68,12 @@ class ConfirmDialog : Fragment() {
                 region {
                     hgrow = Priority.ALWAYS
                 }
-                add(
-                    JFXButton().apply {
-                        addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
-                        graphic = FontIcon("gmi-close")
-                        onActionProperty().bind(onCloseActionProperty())
-                    }
-                )
+                button {
+                    addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
+                    graphic = FontIcon("gmi-close")
+                    onActionProperty().bind(onCloseActionProperty())
+                    visibleProperty().bind(onCloseActionProperty().isNotNull)
+                }
             }
         }
         hbox {
@@ -88,36 +84,54 @@ class ConfirmDialog : Fragment() {
                 addClass("confirm-dialog__message")
             }
         }
+        vbox {
+            addClass("confirm-dialog__progress")
+            add(
+                JFXProgressBar().apply {
+                    prefWidthProperty().bind(this@vbox.widthProperty())
+                }
+            )
+            label(progressTitleProperty).apply {
+                addClass("confirm-dialog__progress-title")
+            }
+            visibleProperty().bind(showProgressBarProperty)
+            managedProperty().bind(visibleProperty())
+        }
         hbox {
             addClass("confirm-dialog__footer")
 
-            add(
-                JFXButton().apply {
-                    addClass("btn", "btn--primary", "confirm-dialog__btn--cancel")
-                    graphic = FontIcon("gmi-close")
-                    textProperty().bind(cancelButtonTextProperty)
-                    onActionProperty().bind(onCancelActionProperty())
-                }
-            )
+            button(cancelButtonTextProperty) {
+                addClass("btn", "btn--primary")
+                graphic = FontIcon("gmi-close")
+                onActionProperty().bind(onCancelActionProperty())
+                visibleProperty().bind(onCancelActionProperty.isNotNull)
+                managedProperty().bind(visibleProperty())
+            }
 
             region {
                 addClass("confirm-dialog__footer-spacer")
                 hgrow = Priority.ALWAYS
+                managedProperty().bind(onCancelActionProperty.isNotNull)
             }
 
-            add(
-                JFXButton().apply {
-                    addClass("btn", "btn--secondary", "confirm-dialog__btn--confirm")
-                    graphic = FontIcon("gmi-remove")
-                    textProperty().bind(confirmButtonTextProperty)
-                    onActionProperty().bind(onConfirmActionProperty())
-                }
+            button(confirmButtonTextProperty) {
+                addClass("btn", "btn--secondary", "btn--borderless")
+                graphic = FontIcon("gmi-remove")
+                onActionProperty().bind(onConfirmActionProperty())
+                visibleProperty().bind(onConfirmActionProperty.isNotNull)
+                managedProperty().bind(visibleProperty())
+            }
+
+            visibleProperty().bind(
+                onCancelActionProperty.isNotNull.or(onConfirmActionProperty.isNotNull)
             )
+            managedProperty().bind(visibleProperty())
         }
     }
 
-    fun open() {
-        openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
+    init {
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        setContent(content)
     }
 
     private fun backgroundBinding(): ObjectBinding<Background?> {

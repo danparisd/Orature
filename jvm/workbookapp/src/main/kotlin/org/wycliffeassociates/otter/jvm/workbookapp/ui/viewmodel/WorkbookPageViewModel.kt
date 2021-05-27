@@ -54,6 +54,9 @@ class WorkbookPageViewModel : ViewModel() {
     val showDeleteProgressDialogProperty = SimpleBooleanProperty(false)
     val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
+
     val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
@@ -169,10 +172,14 @@ class WorkbookPageViewModel : ViewModel() {
 
     fun exportWorkbook(directory: File) {
         showExportProgressDialogProperty.set(true)
+
         val workbook = workbookDataStore.workbook
         val projectExporter = projectExporterProvider.get()
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
+
+        activeProjectTitleProperty.set(workbook.target.title)
+        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
 
         projectExporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
@@ -180,6 +187,10 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
                 logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
+            }
+            .doFinally {
+                activeProjectTitleProperty.set(null)
+                activeProjectCoverProperty.set(null)
             }
             .subscribe { result: ExportResult ->
                 showExportProgressDialogProperty.set(false)
@@ -195,12 +206,19 @@ class WorkbookPageViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
 
+        activeProjectTitleProperty.set(workbook.target.title)
+        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+
         workbookRepository.closeWorkbook(workbook)
         deleteProject
             .delete(workbook, true)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
+            }
+            .doFinally {
+                activeProjectTitleProperty.set(null)
+                activeProjectCoverProperty.set(null)
             }
             .subscribe {
                 showDeleteProgressDialogProperty.set(false)
