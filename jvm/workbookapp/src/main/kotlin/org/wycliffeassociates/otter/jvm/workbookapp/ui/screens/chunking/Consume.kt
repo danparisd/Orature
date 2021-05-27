@@ -59,7 +59,7 @@ class Consume : Fragment() {
 
     override val root = vbox {
         importStylesheet(resources["/css/root.css"])
-        importStylesheet(resources["/css/button.css"])
+        importStylesheet(resources["/css/control.css"])
         borderpane {
             alignment = Pos.CENTER
             hgrow = Priority.ALWAYS

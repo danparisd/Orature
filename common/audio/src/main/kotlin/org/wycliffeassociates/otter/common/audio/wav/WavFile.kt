@@ -36,9 +36,9 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 class WavFile private constructor() {
 
     lateinit var file: File
+        private set
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
-        private set
 
     var sampleRate: Int = DEFAULT_SAMPLE_RATE
         private set
