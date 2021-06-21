@@ -6,6 +6,7 @@ plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
     id 'com.github.johnrengelman.shadow' version "$shadowPluginVer"
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.1'
 }
 
 apply plugin: 'application'
@@ -13,7 +14,7 @@ apply plugin: 'idea'
 
 javafx {
     version = "$javafxVer"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml']
 }
 
 repositories {
@@ -33,18 +34,18 @@ sourceSets {
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources{
-            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        resources {
+            srcDirs += [file('src/integration-test/resources'), assets.resources]
         }
     }
     main {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
     test {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
 }
@@ -174,6 +175,91 @@ dependencies {
     implementation "io.sentry:sentry:$sentryVer"
 }
 
+gluonfx {
+    reflectionList = [
+            'org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration',
+            'org.apache.logging.log4j.message.DefaultFlowMessageFactory',
+            'org.apache.logging.log4j.core.impl.Log4jContextFactory',
+            'org.apache.logging.log4j.core.util.ExecutorServices',
+            'org.apache.logging.log4j.message.ParameterizedMessageFactory',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookPageViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.LanguageSelectionViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.MainScreenViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableTabViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler',
+            'tornadofx.Workspace',
+            'tornadofx.WorkspaceArea',
+            'tornadofx.UIComponent',
+            'tornadofx.Stylesheet',
+            'javafx.scene.control.Button',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar',
+            'org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler',
+            'org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog'
+    ]
+    compilerArgs = [
+            '--allow-incomplete-classpath',
+            '--enable-url-protocols=css'
+    ]
+    jniList = [
+            '--enable-url-protocols=css'
+    ]
+    runtimeArgs = ['--enable-url-protocols=css']
+}
+
+run {
+    jvmArgs = [
+            '--add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+            '--add-exports=javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.prism=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.font=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
+            '--add-exports=javafx.controls/com.sun.javafx.scene.control.skin=ALL-UNNAMED',
+            '--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.scene.input=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.text=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.javafx.scene.text=ALL-UNNAMED',
+            '--add-opens=javafx.graphics/javafx.scene=ALL-UNNAMED',
+            '--add-opens=javafx.graphics/javafx.scene.text=ALL-UNNAMED'
+    ]
+}
+
+
+mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+
 // tell gradle what to put in the jar
 shadowJar {
     archiveFileName = 'workbookapp.jar'
@@ -211,7 +297,7 @@ task createVersionProperties(dependsOn: processResources) {
 
 task createGithubProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
+        if (project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
             new File("$buildDir/resources/main/github.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['repo-url'] = githubRepoUrl
@@ -224,7 +310,7 @@ task createGithubProperties(dependsOn: processResources) {
 
 task createSentryProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('sentryDsn')) {
+        if (project.hasProperty('sentryDsn')) {
             new File("$buildDir/resources/main/sentry.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['dsn'] = sentryDsn
