@@ -53,14 +53,16 @@ class LanguageDao(
                 LANGUAGE_ENTITY.NAME,
                 LANGUAGE_ENTITY.ANGLICIZED,
                 LANGUAGE_ENTITY.DIRECTION,
-                LANGUAGE_ENTITY.GATEWAY
+                LANGUAGE_ENTITY.GATEWAY,
+                LANGUAGE_ENTITY.REGION
             )
             .values(
                 entity.slug,
                 entity.name,
                 entity.anglicizedName,
                 entity.direction,
-                entity.gateway
+                entity.gateway,
+                entity.region
             )
             .execute()
 
@@ -92,14 +94,16 @@ class LanguageDao(
                         LANGUAGE_ENTITY.NAME,
                         LANGUAGE_ENTITY.ANGLICIZED,
                         LANGUAGE_ENTITY.DIRECTION,
-                        LANGUAGE_ENTITY.GATEWAY
+                        LANGUAGE_ENTITY.GATEWAY,
+                        LANGUAGE_ENTITY.REGION
                     )
                     .values(
                         entity.slug,
                         entity.name,
                         entity.anglicizedName,
                         entity.direction,
-                        entity.gateway
+                        entity.gateway,
+                        entity.region
                     )
                     .execute()
             }
@@ -114,6 +118,21 @@ class LanguageDao(
 
         // Return the ids
         return ((initialLargest + 1)..finalLargest).toList()
+    }
+
+    @Synchronized
+    fun updateRegions(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+        dsl.transaction { config ->
+            val transactionDsl = DSL.using(config)
+            entities.forEach { entity ->
+                // Update region of the language entity
+                transactionDsl.
+                    update(LANGUAGE_ENTITY)
+                    .set(LANGUAGE_ENTITY.REGION, entity.region)
+                    .where(LANGUAGE_ENTITY.SLUG.eq(entity.slug))
+                    .execute()
+            }
+        }
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity {
@@ -143,6 +162,7 @@ class LanguageDao(
             .set(LANGUAGE_ENTITY.ANGLICIZED, entity.anglicizedName)
             .set(LANGUAGE_ENTITY.DIRECTION, entity.direction)
             .set(LANGUAGE_ENTITY.GATEWAY, entity.gateway)
+            .set(LANGUAGE_ENTITY.REGION, entity.region)
             .where(LANGUAGE_ENTITY.ID.eq(entity.id))
             .execute()
     }

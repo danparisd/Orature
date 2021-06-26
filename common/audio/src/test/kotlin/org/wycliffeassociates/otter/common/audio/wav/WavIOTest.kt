@@ -4,15 +4,19 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
 import java.io.FileInputStream
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 class WavIOTest {
     private val testCues = listOf(
-        WavCue(123_943_347, "marker 1"),
-        WavCue(200_000_000, "marker 2"),
-        WavCue(300_000_000, "marker 3 ")
+        AudioCue(123_943_347, "marker 1"),
+        AudioCue(200_000_000, "marker 2"),
+        AudioCue(300_000_000, "marker 3 ")
     )
 
-    private fun writeDataToFile(file: File, samplesToWrite: Int, cues: List<WavCue>): WavFile {
+    private fun writeDataToFile(file: File, samplesToWrite: Int, cues: List<AudioCue>): WavFile {
         val wav = WavFile(
             file,
             DEFAULT_CHANNELS,

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -41,6 +42,12 @@ class WorkbookPage : Fragment() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
 
+    private var deleteListener: ChangeListener<Boolean>? = null
+    private var deleteProgressListener: ChangeListener<Boolean>? = null
+    private var deleteSuccessListener: ChangeListener<Boolean>? = null
+    private var deleteFailListener: ChangeListener<Boolean>? = null
+    private var exportProgressListener: ChangeListener<Boolean>? = null
+
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
             viewModel.workbookDataStore.activeChapterProperty.stringBinding {
@@ -60,9 +67,15 @@ class WorkbookPage : Fragment() {
     }
 
     init {
+        importStylesheet(resources.get("/css/workbook-page.css"))
+        importStylesheet(resources.get("/css/chapter-card.css"))
+        importStylesheet(resources.get("/css/workbook-banner.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
+
         initializeProgressDialogs()
         initializeDeleteConfirmDialog()
-        importStylesheet(resources.get("/css/workbook-page.css"))
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**
@@ -85,6 +98,7 @@ class WorkbookPage : Fragment() {
      */
     override fun onUndock() {
         tabMap.clear()
+        removeDialogListeners()
     }
 
     private fun createTabs() {
@@ -126,23 +140,77 @@ class WorkbookPage : Fragment() {
             )
 
             onConfirmAction {
-                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
 
-            viewModel.showDeleteDialogProperty.onChange {
-                if (it) open() else close()
+            deleteListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
             }
+            viewModel.showDeleteDialogProperty.addListener(deleteListener)
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
         }
     }
 
+    private fun initializeDeleteSuccessDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectSuccess"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["goHome"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
+
+            deleteSuccessListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteSuccessDialogProperty.addListener(deleteSuccessListener)
+
+            onCloseAction { viewModel.goBack() }
+            onCancelAction { viewModel.goBack() }
+        }
+    }
+
+    private fun initializeDeleteFailDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectFail"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
+
+            deleteFailListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteFailDialogProperty.addListener(deleteFailListener)
+
+            onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
+        }
+    }
+
     private fun initializeProgressDialogs() {
         confirmdialog {
-            viewModel.showDeleteProgressDialogProperty.onChange {
-                if (it) {
+            deleteProgressListener = ChangeListener { _, _, value ->
+                if (value) {
                     titleTextProperty.bind(
                         viewModel.activeProjectTitleProperty.stringBinding {
                             it?.let {
@@ -161,8 +229,10 @@ class WorkbookPage : Fragment() {
                     close()
                 }
             }
-            viewModel.showExportProgressDialogProperty.onChange {
-                if (it) {
+            viewModel.showDeleteProgressDialogProperty.addListener(deleteProgressListener)
+
+            exportProgressListener = ChangeListener { _, _, value ->
+                if (value) {
                     titleTextProperty.bind(
                         viewModel.activeProjectTitleProperty.stringBinding {
                             it?.let {
@@ -181,9 +251,19 @@ class WorkbookPage : Fragment() {
                     close()
                 }
             }
+            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
+
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
         }
+    }
+
+    private fun removeDialogListeners() {
+        viewModel.showDeleteDialogProperty.removeListener(deleteListener)
+        viewModel.showDeleteProgressDialogProperty.removeListener(deleteProgressListener)
+        viewModel.showDeleteFailDialogProperty.removeListener(deleteFailListener)
+        viewModel.showDeleteSuccessDialogProperty.removeListener(deleteSuccessListener)
+        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
     }
 
     /**

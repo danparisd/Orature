@@ -7,18 +7,14 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.geometry.Insets
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.BackgroundImage
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
-import javafx.scene.layout.CornerRadii
-import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
@@ -40,14 +36,12 @@ class WorkbookBanner : Control() {
         styleClass.setAll("workbook-banner")
     }
 
-    fun backgroundBinding(): ObjectBinding<Background> {
+    fun backgroundBinding(): ObjectBinding<Background?> {
         return Bindings.createObjectBinding(
             Callable {
-                var background = Background(backgroundFill())
                 backgroundImageFileProperty.value?.let {
-                    background = Background(backgroundImage(it))
+                    Background(backgroundImage(it))
                 }
-                background
             },
             backgroundImageFileProperty
         )
@@ -69,14 +63,6 @@ class WorkbookBanner : Control() {
             BackgroundRepeat.NO_REPEAT,
             BackgroundPosition.DEFAULT,
             backgroundSize
-        )
-    }
-
-    private fun backgroundFill(): BackgroundFill {
-        return BackgroundFill(
-            Paint.valueOf("#1067c4"),
-            CornerRadii.EMPTY,
-            Insets.EMPTY
         )
     }
 

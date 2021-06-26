@@ -22,7 +22,8 @@ class RecordMappers {
                 record.getValue(LANGUAGE_ENTITY.NAME),
                 record.getValue(LANGUAGE_ENTITY.ANGLICIZED),
                 record.getValue(LANGUAGE_ENTITY.DIRECTION),
-                record.getValue(LANGUAGE_ENTITY.GATEWAY)
+                record.getValue(LANGUAGE_ENTITY.GATEWAY),
+                record.getValue(LANGUAGE_ENTITY.REGION)
             )
         }
 
@@ -119,6 +120,14 @@ class RecordMappers {
                 record.getValue(AUDIO_PLUGIN_ENTITY.RECORD),
                 record.getValue(AUDIO_PLUGIN_ENTITY.MARK),
                 record.getValue(AUDIO_PLUGIN_ENTITY.PATH)
+            )
+        }
+
+        fun mapToTranslationEntity(record: Record): TranslationEntity {
+            return TranslationEntity(
+                record.getValue(TRANSLATION_ENTITY.ID),
+                record.getValue(TRANSLATION_ENTITY.SOURCE_FK),
+                record.getValue(TRANSLATION_ENTITY.TARGET_FK)
             )
         }
     }

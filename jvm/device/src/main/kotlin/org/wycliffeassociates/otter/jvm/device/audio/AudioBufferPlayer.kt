@@ -4,15 +4,19 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
+import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class AudioBufferPlayer : IAudioPlayer {
+
+    override val frameStart: Int
+        get() = begin
+    override val frameEnd: Int
+        get() = end
 
     private var pause = AtomicBoolean(false)
     private var startPosition: Int = 0
@@ -42,7 +46,7 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = WavFileReader(WavFile(file)).let { _reader ->
+        reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
@@ -65,7 +69,7 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        reader = WavFileReader(WavFile(file), frameStart, frameEnd).let { _reader ->
+        reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
             player = AudioSystem.getSourceDataLine(
                 AudioFormat(
@@ -115,7 +119,7 @@ class AudioBufferPlayer : IAudioPlayer {
     override fun pause() {
         reader?.let { _reader ->
             if (::player.isInitialized) {
-                val stoppedAt = getAbsoluteLocationInFrames()
+                val stoppedAt = getLocationInFrames()
                 startPosition = stoppedAt
                 pause.set(true)
                 player.stop()
@@ -162,20 +166,20 @@ class AudioBufferPlayer : IAudioPlayer {
         return player.isRunning
     }
 
-    override fun getAbsoluteDurationInFrames(): Int {
+    override fun getDurationInFrames(): Int {
         return end - begin
     }
 
-    override fun getAbsoluteDurationMs(): Int {
+    override fun getDurationMs(): Int {
         return ((end - begin) / 44.1).toInt()
     }
 
-    override fun getAbsoluteLocationInFrames(): Int {
-        return startPosition + player.framePosition
+    override fun getLocationInFrames(): Int {
+        return frameStart + startPosition + player.framePosition
     }
 
-    override fun getAbsoluteLocationMs(): Int {
-        return (getAbsoluteLocationInFrames() / 44.1).toInt()
+    override fun getLocationMs(): Int {
+        return (getLocationInFrames() / 44.1).toInt()
     }
 
     fun framePosition() {

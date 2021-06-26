@@ -45,6 +45,9 @@ import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.dublincore
 import org.wycliffeassociates.resourcecontainer.entity.project
+import java.io.File
+import java.time.LocalDate
+import javax.inject.Inject
 
 class CollectionRepository @Inject constructor(
     private val database: AppDatabase,
@@ -230,6 +233,19 @@ class CollectionRepository @Inject constructor(
             }
             .doOnError { e ->
                 log.error("Error in getDerivedProjects", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getProject(id: Int): Maybe<Collection> {
+        return Maybe
+            .fromCallable {
+                buildCollection(
+                    collectionDao.fetchById(id)
+                )
+            }
+            .doOnError { e ->
+                log.error("Error in getProject, id: $id", e)
             }
             .subscribeOn(Schedulers.io())
     }

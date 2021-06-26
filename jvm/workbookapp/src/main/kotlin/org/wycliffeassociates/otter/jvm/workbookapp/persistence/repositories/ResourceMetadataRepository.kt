@@ -86,7 +86,7 @@ class ResourceMetadataRepository @Inject constructor(
                     .map(this::buildMetadata)
             }
             .doOnError { e ->
-                logger.error("Error in getAll", e)
+                logger.error("Error in getAllSources", e)
             }
             .subscribeOn(Schedulers.io())
     }

@@ -130,7 +130,6 @@ class ConfirmDialog : OtterDialog() {
     }
 
     init {
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
         setContent(content)
     }
 

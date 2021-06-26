@@ -10,7 +10,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
@@ -55,7 +55,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     init {
         val audioFile = File(scopeVM.parameters.named["wav"])
-        val wav = WavFile(audioFile)
+        val wav = AudioFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
             scopeVM.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
@@ -85,7 +85,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun computeImageWidth(secondsOnScreen: Int): Double {
         val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
-        val pixelsInDuration = audioPlayer.getAbsoluteDurationInFrames() / samplesPerPixel
+        val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
         return pixelsInDuration
     }
 
@@ -110,14 +110,14 @@ class VerseMarkerViewModel : ViewModel() {
     fun seekNext() {
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) { audioController?.toggle() }
-        seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekNext(audioPlayer.getLocationInFrames()))
         if (wasPlaying) { audioController?.toggle() }
     }
 
     fun seekPrevious() {
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) { audioController?.toggle() }
-        seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
         if (wasPlaying) { audioController?.toggle() }
     }
 
@@ -138,22 +138,22 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun placeMarker() {
-        markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
+        markers.addMarker(audioPlayer.getLocationInFrames())
     }
 
     fun calculatePosition() {
-        val current = audioPlayer.getAbsoluteLocationInFrames()
-        val duration = audioPlayer.getAbsoluteDurationInFrames().toDouble()
+        val current = audioPlayer.getLocationInFrames()
+        val duration = audioPlayer.getDurationInFrames().toDouble()
         val percentPlayed = current / duration
         val pos = percentPlayed * imageWidth
         positionProperty.set(pos)
     }
 
     fun getLocationInFrames(): Int {
-        return audioPlayer.getAbsoluteLocationInFrames()
+        return audioPlayer.getLocationInFrames()
     }
 
     fun getDurationInFrames(): Int {
-        return audioPlayer.getAbsoluteDurationInFrames()
+        return audioPlayer.getDurationInFrames()
     }
 }

@@ -4,7 +4,6 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
@@ -20,11 +19,12 @@ import tornadofx.add
 import tornadofx.getValue
 import tornadofx.setValue
 import java.io.File
+import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
-    val wav = WavFile(File(parameters.named["wav"]), 1, 44100, 16)
+    val wav = AudioFile(File(parameters.named["wav"]), 1, 44100, 16)
     val recorder = AudioRecorder()
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {

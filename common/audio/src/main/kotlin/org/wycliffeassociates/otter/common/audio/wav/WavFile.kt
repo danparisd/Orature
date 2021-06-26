@@ -9,16 +9,17 @@ import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
 private const val FMT = "fmt "
 private const val DATA = "data"
 private const val PCM: Short = 1
-
-const val DEFAULT_SAMPLE_RATE = 44100
-const val DEFAULT_CHANNELS = 1
-const val DEFAULT_BITS_PER_SAMPLE = 16
 
 internal const val WAV_HEADER_SIZE = 44
 private const val AUDIO_LENGTH_LOCATION = 40
@@ -33,30 +34,38 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-class WavFile private constructor() {
+internal class WavFile private constructor() : AudioFormatStrategy {
 
     lateinit var file: File
         private set
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 
-    var sampleRate: Int = DEFAULT_SAMPLE_RATE
+    override var sampleRate: Int = DEFAULT_SAMPLE_RATE
         private set
-    var channels: Int = DEFAULT_CHANNELS
+    override var channels: Int = DEFAULT_CHANNELS
         private set
-    var bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+    override var bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
         private set
     val frameSizeInBytes = channels * (bitsPerSample / BITS_IN_BYTE)
 
-    val totalFrames: Int
+    override val totalFrames: Int
         get() = totalAudioLength / frameSizeInBytes
+
+    override fun addCue(location: Int, label: String) {
+        metadata.addCue(location, label)
+    }
+
+    override fun getCues(): List<AudioCue> {
+        return metadata.getCues()
+    }
 
     var totalAudioLength = 0
         internal set
 
     internal var totalDataLength = 0
 
-    var metadata = WavMetadata()
+    override var metadata = WavMetadata()
         private set
 
     val hasMetadata
@@ -103,17 +112,17 @@ class WavFile private constructor() {
         initializeWavFile()
     }
 
-    fun writeMetadata(outputStream: OutputStream) {
+    internal fun writeMetadata(outputStream: OutputStream) {
         metadata.writeMetadata(outputStream)
     }
 
     @Throws(IOException::class)
-    fun finishWrite(totalAudioLength: Int) {
+    internal fun finishWrite(totalAudioLength: Int) {
         this.totalAudioLength = totalAudioLength
         this.totalDataLength = WAV_HEADER_SIZE - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
     }
 
-    fun initializeWavFile() {
+    internal fun initializeWavFile() {
         totalDataLength = WAV_HEADER_SIZE - CHUNK_HEADER_SIZE
         totalAudioLength = 0
 
@@ -212,7 +221,7 @@ class WavFile private constructor() {
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
 
-    fun update() {
+    override fun update() {
         // the use block will write nothing, but will call .close()
         // which will truncate the file at the end of the audio section,
         // write out metadata, and update the header
