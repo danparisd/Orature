@@ -7,7 +7,7 @@ import javafx.scene.paint.Paint
 import javax.inject.Inject
 import javax.inject.Provider
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -49,7 +49,7 @@ class Consume : Fragment() {
             player.set(ap)
             val wav = vm.sourceAudio.get()
             secondsToHighlightProperty.set(0)
-            waveformImageBuilder.build(WavFileReader(wav), fitToAudioMax = false).subscribe { img ->
+            waveformImageBuilder.build(wav.reader(), fitToAudioMax = false).subscribe { img ->
                 waveformImageProperty.set(img)
             }
         }

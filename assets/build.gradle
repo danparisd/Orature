@@ -2,20 +2,28 @@ group = 'org.wycliffeassociates.otter.assets'
 version '0.0.2'
 
 repositories {
+//    ivy {
+//        url 'https://git.door43.org'
+//        patternLayout {
+//            // https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec/en_ulb_2pe.zip
+//            artifact '[organisation]/[module]/archive/[revision].[ext]'
+//        }
+//        metadataSources { artifact() }
+//    }
+//    ivy {
+//        url 'https://audio-content.bibleineverylanguage.org/rc/b1d3890e-ec07-4ee3-89fe-174ffa750af5'
+//        patternLayout {
+//            // https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec/en_ulb_2pe.zip
+//            artifact '[artifact].[ext]'
+//        }
+//    }
+
     ivy {
         url 'https://git.door43.org'
         patternLayout {
-            // https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec/en_ulb_2pe.zip
             artifact '[organisation]/[module]/archive/[revision].[ext]'
         }
         metadataSources { artifact() }
-    }
-    ivy {
-        url 'https://audio-content.bibleineverylanguage.org/rc/b1d3890e-ec07-4ee3-89fe-174ffa750af5'
-        patternLayout {
-            // https://audio-content.bibleineverylanguage.org/rc/ec1f89b8-7056-4b7c-bd8f-908311ad0dec/en_ulb_2pe.zip
-            artifact '[artifact].[ext]'
-        }
     }
     ivy {
         url 'http://td.unfoldingword.org/exports/'
@@ -31,8 +39,8 @@ configurations {
 }
 
 dependencies {
-    // content 'wycliffeassociates:en_ulb:v19-10@zip'
-    content 'bibleineverylanguage:en_ulb_jas@zip'
+    content 'wycliffeassociates:en_ulb:v19-10@zip'
+    //content 'bibleineverylanguage:en_ulb_jas@zip'
     content 'unfoldingword:langnames@json'
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation project(":common")
@@ -40,6 +48,20 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "com.google.dagger:dagger:$daggerVer"
 }
+
+//task copyToResources(type: Copy) {
+//    dependsOn configurations.content
+//    from configurations.content
+//    into 'src/main/resources/content'
+//    rename {
+//        String filename ->
+//            if (filename.matches(".*.json\$")) {
+//                filename.replaceAll('-\\.json$', '.json')
+//            } else {
+//                filename.replaceAll('en_ulb_jas-.zip$', 'en_ulb.zip')
+//            }
+//    }
+//}
 
 task copyToResources(type: Copy) {
     dependsOn configurations.content
@@ -50,9 +72,10 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('en_ulb_jas-.zip$', 'en_ulb.zip')
+                filename.replaceAll('-v\\d{2}-\\d{2}\\.zip$', '.zip')
             }
     }
 }
+
 
 compileJava.dependsOn copyToResources

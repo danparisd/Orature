@@ -27,11 +27,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
@@ -69,7 +69,7 @@ class WorkbookRepository(
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val workbook = Workbook(directoryProvider, book(source, disposables), book(target, disposables))
+        val workbook = Workbook(directoryProvider, source(source, disposables), derivative(source, target, disposables))
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
@@ -88,14 +88,13 @@ class WorkbookRepository(
     override fun getProjects(): Single<List<Workbook>> {
         return db.getDerivedProjects()
             .map { projects ->
-                projects.filter {
-                    it.resourceContainer?.type == ContainerType.Book
-                }
+                projects.filter { it.resourceContainer?.type == ContainerType.Book }
             }
             .flattenAsObservable { it }
             .flatMapMaybe(::getWorkbook)
             .toList()
     }
+
 
     override fun getProjects(translation: Translation): Single<List<Workbook>> {
         return db.getDerivedProjects()
@@ -262,23 +261,23 @@ class WorkbookRepository(
         disposables: MutableList<Disposable>
     ): Observable<Chunk> {
         return Observable.defer {
-                if (!hasBeenChunked(sourceChapter)) {
-                    val list = chunkListRelay.blockingLatest().first()
-                    if (list.isEmpty()) {
-                        db.deriveContentForCollection(sourceBook, sourceChapter, derivedMetadata).subscribe()
-                    } else {
-                        db.chunkCollectionFromList(sourceChapter, list).subscribe()
-                    }
-                    sourceChapter.chunked = true
-                    db.updateCollection(sourceChapter).blockingGet()
+            if (!hasBeenChunked(sourceChapter)) {
+                val list = chunkListRelay.blockingLatest().first()
+                if (list.isEmpty()) {
+                    db.deriveContentForCollection(sourceBook, sourceChapter, derivedMetadata).subscribe()
+                } else {
+                    db.chunkCollectionFromList(sourceChapter, list).subscribe()
                 }
-                db.getContentByCollection(sourceChapter)
-                    .flattenAsObservable { it }
-                    .filter { it.type == ContentType.TEXT }
-                    .map {
-                        chunk(it, disposables)
-                    }
-            }.cache()
+                sourceChapter.chunked = true
+                db.updateCollection(sourceChapter).blockingGet()
+            }
+            db.getContentByCollection(sourceChapter)
+                .flattenAsObservable { it }
+                .filter { it.type == ContentType.TEXT }
+                .map {
+                    chunk(it, disposables)
+                }
+        }.cache()
     }
 
     private fun hasBeenChunked(chapter: Collection): Boolean {

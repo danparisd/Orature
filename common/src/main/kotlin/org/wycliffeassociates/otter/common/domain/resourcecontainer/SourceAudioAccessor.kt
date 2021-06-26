@@ -41,8 +41,8 @@ class SourceAudioAccessor(
             if (rc.accessor.fileExists(path)) {
                 if (cache.containsKey(path) && cache[path] != null) {
                     val temp = cache[path]!!
-                    val wav = WavFile(temp)
-                    val size = wav.totalAudioLength / wav.frameSizeInBytes
+                    val wav = AudioFile(temp)
+                    val size = wav.totalFrames
                     val sa = SourceAudio(temp, 0, size)
                     return sa
                 }

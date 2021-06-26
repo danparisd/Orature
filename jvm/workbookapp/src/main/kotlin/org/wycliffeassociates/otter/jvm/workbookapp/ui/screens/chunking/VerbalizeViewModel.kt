@@ -10,8 +10,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.util.Duration
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
@@ -30,7 +29,7 @@ class VerbalizeViewModel : ViewModel() {
 
     val isPlayingProperty = SimpleBooleanProperty(false)
 
-    var wav = WavFile(File.createTempFile("temp",".wav").apply { deleteOnExit() }, 1, 44100, 16)
+    var wav = AudioFile(File.createTempFile("temp",".wav").apply { deleteOnExit() }, 1, 44100, 16)
     var recorder = AudioRecorder()
     var player = AudioBufferPlayer()
     var isLoaded = false
@@ -75,7 +74,7 @@ class VerbalizeViewModel : ViewModel() {
         }
         isLoaded = false
         wav.file.delete()
-        wav = WavFile(File.createTempFile("temp",".wav"), 1, 44100, 16)
+        wav = AudioFile(File.createTempFile("temp",".wav"), 1, 44100, 16)
         recorder = AudioRecorder()
         writer = WavFileWriter(wav, recorder.getAudioStream()) {
             Platform.runLater {

@@ -4,9 +4,6 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import java.io.File
-import java.time.LocalDate
-import javax.inject.Inject
 import jooq.Tables.CONTENT_TYPE
 import jooq.Tables.DUBLIN_CORE_ENTITY
 import jooq.Tables.RC_LINK_ENTITY

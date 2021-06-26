@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Paint
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import tornadofx.ViewModel
 import tornadofx.onChange
 
@@ -20,7 +20,7 @@ class ChunkingViewModel: ViewModel() {
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
 
-    val sourceAudio = SimpleObjectProperty<WavFile>()
+    val sourceAudio = SimpleObjectProperty<AudioFile>()
 
     init {
         titleProperty.onChange {

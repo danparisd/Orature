@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -128,7 +128,7 @@ class NotChunkedPage : Fragment() {
         val chapter = workbookDataStore.activeChapterProperty.value
         val sourceAudio = workbook.sourceAudioAccessor.getChapter(chapter.sort)
         val file = sourceAudio!!.file
-        val wav = WavFile(file)
+        val wav = AudioFile(file)
         (wav.metadata.getCues() as MutableList).clear()
         wav.update()
         val params = PluginParameters(
@@ -145,7 +145,7 @@ class NotChunkedPage : Fragment() {
         scopeVM.parametersProperty.set(constructParams(params))
         scopeVM.closeCallback =
             {
-                val wav = WavFile(sourceAudio!!.file)
+                val wav = AudioFile(sourceAudio!!.file)
                 wav.update()
                 val chunks = wav.metadata.getCues().size
                 commitChunks(chunks)
