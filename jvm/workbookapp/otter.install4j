@@ -4,14 +4,7 @@
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
     <jreBundles jdkProviderId="AdoptOpenJDK" release="11/latest">
-      <modules>
-        <defaultModules set="minimum" />
-        <module name="java.logging" />
-        <module name="java.net.http" />
-        <module name="java.sql" />
-        <module name="jdk.net" />
-        <module name="jdk.zipfs" />
-      </modules>
+      <modules />
     </jreBundles>
   </application>
   <files preserveSymlinks="false">
