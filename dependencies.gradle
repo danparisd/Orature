@@ -1,6 +1,6 @@
 ext {
     // Plugins
-    javafxPluginVer = '0.0.8'
+    javafxPluginVer = '0.0.10'
     jooqPluginVer = '4.0'
     install4jPluginVer = '7.0.8'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
@@ -13,7 +13,7 @@ ext {
 
     // Libraries
     kotlinVer = '1.5.10'
-    javafxVer = '11'
+    javafxVer = '16'
     tornadofxVer = '2.0.0-SNAPSHOT'
     rxkotlinVer = '2.4.0'
     rxkotlinfxVer = '2.2.2'
