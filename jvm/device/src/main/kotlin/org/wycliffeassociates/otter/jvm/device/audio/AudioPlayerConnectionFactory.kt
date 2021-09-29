@@ -18,13 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import com.jakewharton.rxrelay2.PublishRelay
+import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
-internal class AudioPlayerConnectionFactory(var outputLine: SourceDataLine) {
-    internal var player = AudioBufferPlayer(outputLine)
+internal class AudioPlayerConnectionFactory(
+    var outputLine: SourceDataLine,
+    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+) {
+
+    internal var player = AudioBufferPlayer(outputLine, errorRelay)
         private set
 
     internal val connections = ConcurrentHashMap<Int, IAudioPlayer>()
@@ -85,13 +92,17 @@ internal class AudioPlayerConnectionFactory(var outputLine: SourceDataLine) {
 
     @Synchronized
     internal fun load(request: AudioPlayerConnectionState) {
-        player.pause()
-        swapConnection(request)
-        outputLine.flush()
-        player.stop()
-        player = AudioBufferPlayer(outputLine)
-        setDurationOfConnection(request)
-        loadRequestIntoPlayer(request)
-        player.seek(request.position)
+        try {
+            player.pause()
+            swapConnection(request)
+            outputLine.flush()
+            player.stop()
+            player = AudioBufferPlayer(outputLine, errorRelay)
+            setDurationOfConnection(request)
+            loadRequestIntoPlayer(request)
+            player.seek(request.position)
+        } catch (e: LineUnavailableException) {
+            errorRelay.accept(e)
+        }
     }
 }

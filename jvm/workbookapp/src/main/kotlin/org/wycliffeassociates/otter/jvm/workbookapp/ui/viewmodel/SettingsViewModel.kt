@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -30,7 +31,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
+import javax.sound.sampled.LineUnavailableException
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 
 class SettingsViewModel : ViewModel() {
@@ -39,6 +42,9 @@ class SettingsViewModel : ViewModel() {
 
     @Inject
     lateinit var audioDeviceProvider: AudioDeviceProvider
+
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
 
     @Inject
     lateinit var appPrefRepository: IAppPreferencesRepository
@@ -71,6 +77,23 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+        initializeAudioErrorListener()
+    }
+
+    private fun initializeAudioErrorListener() {
+        audioConnectionFactory
+            .errorListener()
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .subscribe {
+                when (it) {
+                    is LineUnavailableException -> {
+                        // trySelectedDevice()
+                    }
+                    else -> {
+                        throw it
+                    }
+                }
+            }
     }
 
     fun refreshPlugins() {
