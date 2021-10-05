@@ -78,14 +78,14 @@ subprojects {
     }
 
     group 'org.wycliffeassociates'
-    sourceCompatibility = 11
+    sourceCompatibility = 16
 
     compileKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "16"
     }
 
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "16"
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']

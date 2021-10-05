@@ -108,7 +108,8 @@ dependencies {
     implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
 
     // JFoenix
-    implementation "com.jfoenix:jfoenix:$jfoenixVer"
+    implementation "org.rationalityfrontline.workaround:jfoenix:17.0.0"
+    // implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
     // ControlsFX
     implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"
