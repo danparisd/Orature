@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="9.0.4" transformSequenceNumber="9">
+<install4j version="9.0.5" transformSequenceNumber="9">
   <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="11/jdk-11.0.3+7">
+      <modules>
+        <defaultModules set="all" />
+      </modules>
+    </jreBundles>
   </application>
   <files preserveSymlinks="false">
     <mountPoints>
@@ -878,5 +883,11 @@ done</postUninstallScript>
         <file name=".DS_Store" file="./DS_Store" />
       </topLevelFiles>
     </macosArchive>
+    <windows name="Windows32" id="496" jreBitType="32">
+      <excludedBeans>
+        <bean refId="414" />
+      </excludedBeans>
+      <jreBundle usePack200="false" includedJre="windows-amd64-11.0.3.tar.gz" manualJreEntry="true" />
+    </windows>
   </mediaSets>
 </install4j>
