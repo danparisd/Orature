@@ -322,4 +322,5 @@ integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
 install4jdeploy.dependsOn build
-install4jdeploy.dependsOn integrationTest
+install4jdeploy.dependsOn ':assets:build'
+install4jdeploy.dependsOn ':assets:copyToResources'
