@@ -27,7 +27,7 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
-          -e DISPLAY
+          -e DISPLAY \
           wycliffeassociates/install4j-docker:9.0.5 \
           xvfb-run -a ./gradlew detekt sonarqube :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
