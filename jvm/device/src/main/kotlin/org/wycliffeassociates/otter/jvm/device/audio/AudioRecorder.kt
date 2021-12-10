@@ -34,6 +34,10 @@ class AudioRecorder(
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioRecorder {
 
+    init {
+        System.setProperty("rx2.newthread-priority", Thread.MAX_PRIORITY.toString())
+    }
+
     private val monitor = Object()
 
     @Volatile
@@ -69,7 +73,7 @@ class AudioRecorder(
             }
             stop = false
         }
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.newThread())
         .subscribe()
 
     @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress

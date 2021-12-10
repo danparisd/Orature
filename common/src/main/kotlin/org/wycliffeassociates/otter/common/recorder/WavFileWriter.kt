@@ -19,8 +19,10 @@
 package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
+import io.reactivex.internal.schedulers.SchedulerPoolFactory
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.ThreadFactory
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -30,6 +32,11 @@ class WavFileWriter(
     private val audioStream: Observable<ByteArray>,
     private val onComplete: () -> Unit
 ) {
+
+    init {
+        System.setProperty("rx2.newthread-priority", Thread.MAX_PRIORITY.toString())
+    }
+
     private val logger = LoggerFactory.getLogger(WavFileWriter::class.java)
 
     private var record = AtomicBoolean(false)
@@ -64,7 +71,7 @@ class WavFileWriter(
                 onComplete()
             }
         )
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.newThread())
         .doOnError { e -> logger.error("Error in WavFileWriter", e) }
         .subscribe()
 }
