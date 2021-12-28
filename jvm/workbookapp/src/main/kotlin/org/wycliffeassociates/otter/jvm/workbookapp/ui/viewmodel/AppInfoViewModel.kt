@@ -28,6 +28,7 @@ import java.awt.Desktop
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class AppInfoViewModel : ViewModel() {
     val errorDescription = SimpleStringProperty()
@@ -57,9 +58,9 @@ class AppInfoViewModel : ViewModel() {
 
     fun browseApplicationLog() {
         if (Desktop.isDesktopSupported()) {
-            Thread {
+            thread(isDaemon = true) {
                 Desktop.getDesktop().open(directoryProvider.logsDirectory)
-            }.start()
+            }
         }
     }
 }
