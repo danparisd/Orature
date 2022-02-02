@@ -49,3 +49,8 @@
 .translation-wizard__root .list-cell .language-card-cell {
     -fx-max-width: 800px;
 }
+
+.translation-wizard__status-label {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 20px;
+}
