@@ -90,8 +90,8 @@ class ConfirmDialog : OtterDialog() {
                     addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
                     tooltip(messages["close"])
                     graphic = FontIcon("gmi-close")
-                    onActionProperty().bind(onCloseActionProperty())
-                    visibleProperty().bind(onCloseActionProperty().isNotNull)
+                    onActionProperty().bind(onCloseActionProperty)
+                    visibleProperty().bind(onCloseActionProperty.isNotNull)
                 }
             }
         }

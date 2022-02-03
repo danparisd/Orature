@@ -54,6 +54,11 @@
                                 <FontIcon iconLiteral="mdi-cloud-upload" />
                             </graphic>
                         </JFXButton>
+                        <JFXButton fx:id="downloadAudioBtn" styleClass="btn, btn--primary" text="Download Source Audio" underline="true">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi-cloud-download" />
+                            </graphic>
+                        </JFXButton>
                     </children>
                 </HBox>
             </children>

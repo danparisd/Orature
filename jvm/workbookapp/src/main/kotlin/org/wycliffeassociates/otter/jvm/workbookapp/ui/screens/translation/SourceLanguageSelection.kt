@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -29,12 +28,14 @@ import org.kordamp.ikonli.material.Material
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.LanguageCardCell
+import org.wycliffeassociates.otter.jvm.controls.card.SourceAudioCardCell
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.RemoteLanguage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.RemoteSourceAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.LanguageSelectionViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
@@ -47,6 +48,7 @@ class SourceLanguageSelection : Fragment() {
     private val navigator: NavigationMediator by inject()
 
     private lateinit var remoteLanguageLV: ListView<RemoteLanguage>
+    private lateinit var remoteSourceLV: ListView<RemoteSourceAudio>
     private lateinit var errorLabel: Label
 
     private val breadCrumb = BreadCrumb().apply {
@@ -81,7 +83,6 @@ class SourceLanguageSelection : Fragment() {
             )
             listview(viewModel.filteredLanguages) {
                 addClass("translation-wizard__list")
-//                vgrow = Priority.ALWAYS
                 setCellFactory {
                     LanguageCell(LanguageType.SOURCE, viewModel.anglicizedProperty) {
                         translationViewModel.selectedSourceLanguageProperty.set(it)
@@ -95,45 +96,49 @@ class SourceLanguageSelection : Fragment() {
                 paddingBottom = 15.0
                 spacing = 10.0
 
-                label("Could not find your language? Search it online and import") {
-                    addClass("translation-wizard__title")
-                    paddingRight = 10.0
-                }
-                button {
-                    text = "Fetch languages online"
-                    addClass("btn", "btn--secondary")
-                    setOnAction {
-                        onFetchLanguages(this)
-                    }
-                }
                 hbox {
-                    label("Network Error! Please check you connection and try again.") {
-                        addClass("translation-wizard__status-label")
-                        errorLabel = this
-                        isVisible = false
-                        isManaged = false
-                    }
-                    listview(viewModel.remoteLanguages) {
-                        addClass("translation-wizard__list")
+                    vbox {
+                        label("Could not find your language? Search it online and import") {
+                            addClass("translation-wizard__title")
+                            isWrapText = true
+                            paddingRight = 10.0
+                        }
+                        button {
+                            text = "Fetch online sources"
+                            addClass("btn", "btn--secondary")
+                            setOnAction {
+                                onFetchSourceText()
+                            }
+                        }
+                        label("Network Error! Please check you connection and try again.") {
+                            addClass("translation-wizard__status-label")
+                            errorLabel = this
+                            isVisible = false
+                            isManaged = false
+                        }
+                        listview(viewModel.remoteLanguages) {
+                            addClass("translation-wizard__list")
 
-                        remoteLanguageLV = this
-                        isVisible = false
-                        isManaged = false
+                            remoteLanguageLV = this
+                            isVisible = false
+                            isManaged = false
 
-                        cellFormat {
-                            graphic = cell(this.item)
-                            this.setOnMouseClicked {
-                                viewModel.importLanguage(this.item)
-                                    .subscribe(
-                                        { },
-                                        {
-                                            errorLabel.isVisible = true
-                                            errorLabel.isManaged = true
-                                        })
+                            cellFormat {
+                                graphic = languageCell(this.item)
+                                this.setOnMouseClicked {
+                                    viewModel.importLanguage(this.item)
+                                        .subscribe(
+                                            { },
+                                            {
+                                                errorLabel.isVisible = true
+                                                errorLabel.isManaged = true
+                                            })
 
+                                }
                             }
                         }
                     }
+
                 }
             }
         }
@@ -164,31 +169,6 @@ class SourceLanguageSelection : Fragment() {
         translationViewModel.loadSourceLanguages()
     }
 
-    private fun cell(item: RemoteLanguage): Node {
-//        return HBox().apply {
-//            label(item.language.anglicizedName) {
-//                maxWidth = Double.MAX_VALUE
-//                hgrow = Priority.ALWAYS
-//            }
-//            button("Get") {
-//                hgrow = Priority.NEVER
-//                setOnAction {
-//                    viewModel.importLanguage(item)
-//                    isDisable = true
-//                }
-//            }
-//        }
-        return LanguageCardCell().apply {
-            iconProperty.set(FontIcon(Material.CLOUD_DOWNLOAD))
-            languageNameProperty.set(item.language.name)
-            languageSlugProperty.set(item.resourceSlug)
-
-//            setOnMouseClicked {
-//                viewModel.importLanguage(item)
-//            }
-        }
-    }
-
     private fun setUpDialog() {
         val importDialog = confirmdialog {
             titleTextProperty.set(messages["importResource"])
@@ -203,8 +183,25 @@ class SourceLanguageSelection : Fragment() {
         }
     }
 
-    fun onFetchLanguages(element: Node) {
-        viewModel.fetchLanguages()
+    private fun languageCell(item: RemoteLanguage): Node {
+        return LanguageCardCell().apply {
+            iconProperty.set(FontIcon(Material.CLOUD_DOWNLOAD))
+            languageNameProperty.set(item.language.name)
+            languageSlugProperty.set(item.resourceSlug)
+        }
+    }
+
+    private fun sourceAudioCell(item: RemoteSourceAudio): Node {
+        return SourceAudioCardCell().apply {
+            iconProperty.set(FontIcon(Material.SPEAKER))
+            titleProperty.set(item.title)
+            slugProperty.set(item.slug)
+            categoryProperty.set(item.category.name)
+        }
+    }
+
+    private fun onFetchSourceText() {
+        viewModel.fetchSourceTextLanguages()
             .subscribe(
                 {
                     errorLabel.isVisible = false
@@ -218,5 +215,9 @@ class SourceLanguageSelection : Fragment() {
                     remoteLanguageLV.isManaged = false
                 }
             )
+    }
+
+    private fun onFetchSourceAudio() {
+
     }
 }

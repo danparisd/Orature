@@ -71,6 +71,7 @@ class WorkbookPage : View() {
     private var deleteSuccessListener: ChangeListener<Boolean>? = null
     private var deleteFailListener: ChangeListener<Boolean>? = null
     private var exportProgressListener: ChangeListener<Boolean>? = null
+    private var importProgressListener: ChangeListener<Boolean>? = null
     private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<WorkbookItemModel>>()
 
     private val breadCrumb = BreadCrumb().apply {
@@ -300,6 +301,36 @@ class WorkbookPage : View() {
             }
             viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
 
+            importProgressListener =  ChangeListener { _, _, value ->
+                if (!value) {
+                    close()
+                    return@ChangeListener
+                }
+                titleTextProperty.set("Importing Source Audio for ${viewModel.activeProjectTitleProperty.value}")
+                backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
+                progressTitleProperty.bind(viewModel.progressStatusProperty.stringBinding {
+                    when (it) {
+                        -1 -> {
+                            onCloseAction {
+                                progressTitleProperty.unbind()
+                                viewModel.showImportProgressDialogProperty.set(false)
+                                close()
+                            }
+                            "Import failed."
+                        }
+                        1 -> "Downloading..."
+                        2 -> "Importing..."
+                        3 -> {
+                            showProgressBarProperty.set(false)
+                            "Import Successfully!"
+                        }
+                        else -> "Please wait"
+                    }
+                })
+                open()
+            }
+            viewModel.showImportProgressDialogProperty.addListener(importProgressListener)
+
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
@@ -313,6 +344,7 @@ class WorkbookPage : View() {
         viewModel.showDeleteFailDialogProperty.removeListener(deleteFailListener)
         viewModel.showDeleteSuccessDialogProperty.removeListener(deleteSuccessListener)
         viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
+        viewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
     }
 
     /**

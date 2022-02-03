@@ -47,6 +47,7 @@ class WorkbookBanner : Control() {
 
     val onDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onDownloadAudioActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         styleClass.setAll("workbook-banner")
@@ -80,6 +81,10 @@ class WorkbookBanner : Control() {
 
     fun onExportAction(op: () -> Unit) {
         onExportActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun onDownloadAudioAction(op: () -> Unit) {
+        onDownloadAudioActionProperty.set(EventHandler { op.invoke() })
     }
 
     override fun createDefaultSkin(): Skin<*> {

@@ -67,6 +67,8 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
             resourceTitleProperty.set(item.rcTitle)
             hideDeleteButtonProperty.set(item.rcMetadataProperty.value.type == ContainerType.Help)
 
+            item.rcMetadataProperty.value.language.slug
+
             deleteTitleProperty.set(FX.messages["delete"])
 
             exportTitleProperty.set(
@@ -79,6 +81,7 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
 
             onDeleteAction { item.onDelete() }
             onExportAction { item.onExport() }
+            onDownloadAudioAction { item.onDownloadAudio() }
         }
     }
 }

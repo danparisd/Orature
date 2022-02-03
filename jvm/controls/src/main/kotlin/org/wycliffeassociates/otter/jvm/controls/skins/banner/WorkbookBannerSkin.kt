@@ -50,6 +50,9 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     @FXML
     lateinit var exportBtn: Button
 
+    @FXML
+    lateinit var downloadAudioBtn: Button
+
     init {
         loadFXML()
         initializeControl()
@@ -101,6 +104,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
         exportBtn.apply {
             onActionProperty().bind(banner.onExportActionProperty)
         }
+        downloadAudioBtn.onActionProperty().bind(banner.onDownloadAudioActionProperty)
     }
 
     private fun loadFXML() {

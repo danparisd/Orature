@@ -37,6 +37,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.RemoteLanguage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.RemoteSourceAudio
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.SourceAudioCategory
 import tornadofx.*
 import java.io.File
 import java.util.function.Predicate
@@ -58,6 +60,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     val anglicizedProperty = SimpleBooleanProperty(false)
     val filteredLanguages = FilteredList(items)
     val remoteLanguages = observableListOf<RemoteLanguage>()
+    val remoteAudioSources = observableListOf<RemoteSourceAudio>()
     val importInProgress = SimpleBooleanProperty(false)
 
     private var regionPredicate = Predicate<Language> { true }
@@ -181,7 +184,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
     }
 
-    fun fetchLanguages(): Completable {
+    fun fetchSourceTextLanguages(): Completable {
         return Completable
             .fromAction {
                 val languages = languagesFromAPI()
@@ -197,6 +200,13 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
             }
             .observeOnFx()
     }
+
+//    fun fetchSourceAudio(request: RemoteSourceAudio? = null): Completable {
+//        if (request == null) {
+//            // fetch root content: languages
+//
+//        }
+//    }
 
     private fun downloadRC(url: String): Single<File> {
         return Single
@@ -215,7 +225,17 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                 println("Error downloading $url - ${it.message}")
             }
             .subscribeOn(Schedulers.io())
-            .observeOnFx()
+    }
+
+    private fun sourceAudioLanguages(): List<RemoteSourceAudio> {
+        return listOf(
+            RemoteSourceAudio(
+                "en",
+                "English",
+                "",
+                SourceAudioCategory.LANGUAGE
+            )
+        )
     }
 
     private fun languagesFromAPI(): List<RemoteLanguage> {

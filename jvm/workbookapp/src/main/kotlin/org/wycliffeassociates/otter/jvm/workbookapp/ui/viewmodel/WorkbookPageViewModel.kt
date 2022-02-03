@@ -19,11 +19,18 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
@@ -31,6 +38,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -46,6 +54,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -65,6 +74,9 @@ class WorkbookPageViewModel : ViewModel() {
     @Inject
     lateinit var preferencesRepository: IAppPreferencesRepository
 
+    @Inject
+    lateinit var importRcProvider: Provider<ImportResourceContainer>
+
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
@@ -75,6 +87,8 @@ class WorkbookPageViewModel : ViewModel() {
 
     val showDeleteProgressDialogProperty = SimpleBooleanProperty(false)
     val showExportProgressDialogProperty = SimpleBooleanProperty(false)
+    val showImportProgressDialogProperty = SimpleBooleanProperty(false)
+    val progressStatusProperty = SimpleIntegerProperty(0)
 
     val activeProjectTitleProperty = SimpleStringProperty()
     val activeProjectCoverProperty = SimpleObjectProperty<File>()
@@ -165,6 +179,15 @@ class WorkbookPageViewModel : ViewModel() {
                 directory?.let {
                     exportWorkbook(it)
                 }
+            },
+            onDownloadAudio = {
+                val book = workbook.source.slug
+                val language = workbook.source.language.slug
+                val url = "https://audio.bibleineverylanguage.org/gl/$language/orature/$book/all"
+                downloadAndImportRC(url)
+                    .subscribe({}, {
+                        progressStatusProperty.set(-1)
+                    })
             }
         ).apply {
             rcMetadataProperty.bind(selectedResourceMetadata)
@@ -265,5 +288,79 @@ class WorkbookPageViewModel : ViewModel() {
     fun goBack() {
         showDeleteSuccessDialogProperty.set(false)
         navigator.back()
+    }
+
+    private fun downloadAndImportRC(url: String): Completable {
+        progressStatusProperty.set(1)
+        activeProjectCoverProperty.set(
+            workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+        )
+        showImportProgressDialogProperty.set(true)
+        return Single
+            .fromCallable {
+                var request = Request.Builder()
+                    .url(url)
+                    .build()
+                var response = OkHttpClient.Builder()
+                    .build()
+                    .newCall(request)
+                    .execute()
+
+                val urlToDownload = response.body()?.let { body ->
+                    body.string()
+                } ?: throw Exception()
+
+                request = Request.Builder()
+                    .url(urlToDownload)
+                    .build()
+                response = OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.MINUTES)
+                    .build()
+                    .newCall(request)
+                    .execute()
+
+                response.body()?.let { body ->
+                    val file = kotlin.io.path.createTempFile("rc-to-import", "." + File(urlToDownload).extension).toFile()
+                    file.outputStream().buffered().use { out ->
+                        out.write(body.byteStream().buffered().readBytes())
+                    }
+                    file
+                }
+            }
+            .doOnError {
+                println("Error downloading $url - ${it.message}")
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .flatMapCompletable { file ->
+                println("Downloaded RC at $file")
+                Platform.runLater {
+                    progressStatusProperty.set(2)
+                }
+                importRC(file)
+                    .doFinally {
+                        file.deleteRecursively()
+                    }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+    }
+
+    private fun importRC(file: File): Completable {
+        return importRcProvider.get()
+            .import(file)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .doOnError { e ->
+                println("Error in importing resource container $file")
+            }
+            .doOnSuccess {
+                println(it.name)
+                Platform.runLater {
+                    progressStatusProperty.set(3)
+                    showImportProgressDialogProperty.set(false)
+                }
+            }
+            .ignoreElement()
     }
 }

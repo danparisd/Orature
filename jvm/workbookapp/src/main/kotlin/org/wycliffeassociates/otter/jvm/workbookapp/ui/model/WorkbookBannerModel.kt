@@ -28,7 +28,8 @@ class WorkbookBannerModel(
     title: String,
     val coverArt: Artwork?,
     val onDelete: () -> Unit,
-    val onExport: () -> Unit
+    val onExport: () -> Unit,
+    val onDownloadAudio: () -> Unit
 ) : WorkbookItemModel(sort = 0, title = title) {
     val rcMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
 
