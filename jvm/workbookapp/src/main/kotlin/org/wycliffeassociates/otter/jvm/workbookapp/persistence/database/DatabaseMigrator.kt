@@ -188,7 +188,7 @@ class DatabaseMigrator {
             try {
                 dsl
                     .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
-                    .addColumn(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
+                    .addColumnIfNotExists(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
                     .execute()
                 logger.info("Updated database from version 4 to 5")
             } catch (e: DataAccessException) {
