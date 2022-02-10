@@ -6,6 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
+      - name: Parse SemVer if tagged build
+        id: semver_parser 
+        uses: booxmedialtd/ws-action-parse-semver@v1
+        with:
+          input_string: 'refs/tags/v1.0.4-alpha'
+          version_extractor_regex: '\/v(.*)$'
+      - name: Test if yes
+        if: ${{ steps.semver_parser.outputs.prerelease }}
+        run: echo "${{ steps.semver_parser.outputs.prerelease }}"
+      - name: Test if not there
+        if: ${{ steps.semver_parser.outputs.build }}
+        run: echo "${{ steps.semver_parser.outputs.build }}"
       - name: set version var
         run: echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=$(cat VERSION)_$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       - name: Decrypt secret file
