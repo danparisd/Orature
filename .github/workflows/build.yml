@@ -15,7 +15,7 @@ jobs:
       - name: Test if yes
         if: ${{ steps.semver_parser.outputs.prerelease }}
         run: echo "${{ steps.semver_parser.outputs.prerelease }}"
-      - name: Test if not there
+      - name: Test if empty
         if: ${{ steps.semver_parser.outputs.build }}
         run: echo "${{ steps.semver_parser.outputs.build }}"
       - name: set version var
